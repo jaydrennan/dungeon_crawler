@@ -36,4 +36,16 @@ impl Map {
             }
         }
     }
+
+    pub fn in_bonds(&self, point: Point)->bool{
+        point.x >=0 && point.x < SCREEN_WIDTH
+            && point.y >= 0 && point.y < SCREEN_HEIGHT
+    }
+    pub fn try_idx(&self, point : Poiint )-> Option<usize>{
+        if !self.in_bounds(point){
+            None
+        } else {
+            Some(map_idx(point.x, point.y))
+        }
+    }
 }
