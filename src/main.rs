@@ -6,6 +6,9 @@ mod player;
 
 mod prelude {
     pub use bracket_lib::prelude::*;
+    pub use legion::*;
+    pub use legion::world::SubWorld;
+    pub use legion::systems::CommandBuffer;
     pub const SCREEN_WIDTH: i32 = 80;
     pub const SCREEN_HEIGHT: i32 = 50;
     pub const DISPLAY_WIDTH: i32 = SCREEN_WIDTH / 2;
@@ -13,7 +16,6 @@ mod prelude {
     pub use crate::camera::*;
     pub use crate::map::*;
     pub use crate::map_builder::*;
-    pub use crate::player::*;
 }
 
 use prelude::*;
@@ -21,22 +23,27 @@ use prelude::*;
 
 
 struct State {
-    map: Map,
-    player: Player,
-    camera: Camera,
+    ecs: World,
+    resources: Resouces,
+    systems: Schedule,
 }
 
 impl State {
     fn new() -> Self {
-        let mut rng = RandomNumberGenerator::new();
-        let map_builder = MapBuilder::new(&mut rng);
-        Self {
-            map: map_builder.map,
-            player: Player::new(map_builder.player_start),
-            camera: Camera::new(map_builder.player_start),
+            let mut ecs = World::default();
+            let mut resources = Resources::default();
+            let mut rng = RandomNumberGenerator::new();
+            let map_builder = MapBuilder::new(&mut rng);
+            resources.insert(map_builder.map);
+            resources.insert(Camera::new(map_builder.player_start));
+            Self {
+                ecs,
+                resources,
+                systems: build_scheduler()
+            }
         }
     }
-}
+
 
 impl GameState for State {
     fn tick(&mut self, ctx: &mut BTerm) {
@@ -44,9 +51,6 @@ impl GameState for State {
         ctx.cls();
         ctx.set_active_console(1);
         ctx.cls();
-        self.player.update(ctx, &self.map, &mut self.camera);
-        self.map.render(ctx, &self.camera);
-        self.player.render(ctx, &self.camera);
     }
 }
 
