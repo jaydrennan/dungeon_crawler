@@ -7,6 +7,8 @@ mod components;
 
 mod spawner;
 
+mod systems;
+
 mod prelude {
     pub use bracket_lib::prelude::*;
     pub use legion::*;
@@ -21,6 +23,7 @@ mod prelude {
     pub use crate::map_builder::*;
     pub use crate::components::*;
     pub use crate::spawner::*;
+    pub use crate::systems::*;
 }
 
 use prelude::*;
@@ -57,6 +60,10 @@ impl GameState for State {
         ctx.cls();
         ctx.set_active_console(1);
         ctx.cls();
+        self.resources.insert(ctx.key);
+        self.systems.execute(&mut self.ecs, &mut self.resources);
+        render_draw_buffer(ctx).expect("Render error");
+
     }
 }
 
